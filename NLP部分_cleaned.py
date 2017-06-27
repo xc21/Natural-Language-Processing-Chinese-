@@ -82,6 +82,9 @@ f = open("C://Users//caoxun//Desktop//淘宝评论project//synSub.txt", "w")
 f.write( noStop_string )
 f.close()
 
-
+#找到noStop_string中出现频率最高的数个词
+words = re.findall(r'\w+', noStop_string) 
+from collections import Counter 
+print( Counter(words).most_common(10))  
 
 
