@@ -58,5 +58,30 @@ f = open("C://Users//caoxun//Desktop//淘宝评论project//noStop3.txt", "w")
 f.write(noStop)
 f.close()
 
+#同义词替换
+file = codecs.open('C://Users//caoxun//Desktop//淘宝评论project//Synonyms.txt', 'r', encoding="utf8")
+#讲同义词替换为list of lists
+syn = []
+with open('C://Users//caoxun//Desktop//淘宝评论project//Synonyms.txt', 'r', encoding="utf8") as file:
+     lines = [line for line in file.read().split('\n')]
+for line in lines:
+    syn.append(line.split())
+
+#试着用循环去寻找和替换
+#将noStop变为list
+noStop_list = noStop.split()
+for i in range(len(noStop_list)):
+    for j in range(len(syn)):
+        if noStop_list[i] in syn[j][1:]:
+            noStop_list[i] = syn[j][0]            
+print(noStop_list)
+
+#将noStop转回string,写成txt,测试
+noStop_string = " ".join(noStop_list)
+f = open("C://Users//caoxun//Desktop//淘宝评论project//synSub.txt", "w")
+f.write( noStop_string )
+f.close()
+
+
 
 
