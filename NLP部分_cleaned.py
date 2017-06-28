@@ -31,10 +31,11 @@ shoes_new = re.sub('[～，;！。?？、╯﹏╰xgjjjnbgggf!,~&middot&middot]'
 jieba.load_userdict('C://Users//caoxun//Desktop//淘宝评论project//newDict.txt')
 #分词
 segList = jieba.cut(shoes_new,cut_all=False) #=False > 精准模式
-#打印分词结果
-print ('/'.join(segList))
+
 #分词结果储存
 segResult = " ".join(segList)
+#打印分词结果
+print (segResult)
 
 
 #将停用词txt读取成为string变量
@@ -85,6 +86,22 @@ f.close()
 #找到noStop_string中出现频率最高的数个词
 words = re.findall(r'\w+', noStop_string) 
 from collections import Counter 
-print( Counter(words).most_common(10))  
+freqcount = Counter(words).most_common(15)
+print( freqcount)  
 
+#提高频的词，去掉次数
+frewords = []
+for j in range(0,14):
+       frewords.append(freqcount[j][0])
+        
+
+#标注词性
+freewords_string = " ".join(frewords)
+import jieba.posseg as pseg
+words = pseg.cut(freewords_string)
+for w in words:
+    print("%s %s"%(w.word, w.flag))
+
+
+  
 
