@@ -86,22 +86,35 @@ f.close()
 #找到noStop_string中出现频率最高的数个词
 words = re.findall(r'\w+', noStop_string) 
 from collections import Counter 
-freqcount = Counter(words).most_common(15)
+freqcount = Counter(words).most_common(20)
 print( freqcount)  
 
 #提高频的词，去掉次数
-frewords = []
-for j in range(0,14):
-       frewords.append(freqcount[j][0])
+freqwords = []
+for j in range(0,19):
+       freqwords.append(freqcount[j][0])
         
 
 #标注词性
-freewords_string = " ".join(frewords)
+freqwords_string = " ".join(freqwords)
 import jieba.posseg as pseg
-words = pseg.cut(freewords_string)
+words = pseg.cut(freqwords_string)
+
+tags =[]
+delParts = ["d","v"]
 for w in words:
     print("%s %s"%(w.word, w.flag))
+    if (str(w.flag) not in delParts):
+        tags.append(str(w.word)) 
+        "".join(tags)
+            
+#运行结果
+#"".join(tags)
+#Out[560]: '好看舒适 鞋子   物流快 鞋口偏紧 正品     买的  以 穿起来 质量 评论 挺舒服 老公'
+#以词性为导向来挑标签，需要大量积累错误，手动矫正结巴分词中的词性分类
+#并且，保留额词语结构不一定，比如很多的n+adj词组可为标签，但是很多的n却经常为价值较低的”关键词“        
 
 
-  
+
+
 
