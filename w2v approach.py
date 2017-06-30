@@ -117,13 +117,68 @@ model = word2vec.Word2Vec.load('mymodel') #can continue training with the loaded
 
 #提出词语
 #model.wv.vocab
+#提出vector
+#model.wv.syn0
+
+
+#K-means聚类
+from sklearn.cluster import KMeans
+
+
+# Set "k" (num_clusters) to be 1/5th of the vocabulary size, or an
+# average of 5 words per cluster
+word_vectors = model.wv.syn0
+num_clusters = 5
+
+# Initalize a k-means object and use it to extract centroids
+kmeans_clustering = KMeans(n_clusters = num_clusters)
+idx = kmeans_clustering.fit_predict(word_vectors)
+
+wordDict = dict(zip(model.wv.index2word, idx))
+
+#return dictionary key by its value
+#将dict变为list
+wordDict_list = list(wordDict)
+words=[]
+for cluster in range(0,5):
+    print ("\nCluster %d" % cluster)
+    for word, clst in wordDict.items():
+      if clst == cluster:
+        words.append(word)
+    print(words)
+
+
+lenth = len(wordDict_list)
 
 
 
+#return words in each cluster
+words = [[] for i in range(5)]
+for cluster in range(0,5):
+    #print ("\nCluster %d" % cluster)
+    key = next(key for key, value in wordDict.items() if value == cluster)
+    words[cluster].append(key)#在最内部的list中没有循环起来
+    print(words[cluster])
+
+
+#每个custer的结果一样
+words = [[] for i in range(5)]
+
+for cluster in range(0,5):
+    # Print the cluster number  
+    # print ("\nCluster %d" % cluster)
+    #
+    # Find all of the words for that cluster number, and print them out
+ 
+    for i in range(0,lenth):
+       word = list(wordDict .keys())[list(wordDict .values()).index(cluster)]
+       words[cluster].append(word)
+print (words)
+    
 #进行PCA降维
-#import numpy as np
-#import matplotlib
-#import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
 
 from sklearn.decomposition import PCA
 
@@ -131,8 +186,88 @@ from sklearn.decomposition import PCA
 rawWordVec=vector
 
 # reduce the dimension of word vector
-X_reduced = PCA(n_components=3).fit_transform(rawWordVec)
+X_reduced = PCA(n_components=2).fit_transform(rawWordVec) #从200维降至二维，方便可视化
 
 
-from gensim.models.keyedvectors import KeyedVectors
-word_vectors = KeyedVectors.load_word2vec_format(word_vectors,binary=False)
+#可视化
+# show some word(center word) and it's similar words
+from gensim import similarities
+index = similarities.MatrixSimilarity('mymodel')
+
+from gensim import models
+lsi = models.LsiModel(noStop, id2word=dictionary, num_topics=2)
+index = similarities.MatrixSimilarity(lsi[noStop]) 
+
+
+
+
+
+
+
+#层次聚类
+from matplotlib import pyplot as plt
+from scipy.cluster.hierarchy import dendrogram, linkage
+
+l = linkage(model.wv.syn0, method='complete', metric='seuclidean')
+
+# calculate full dendrogram
+plt.figure(figsize=(25, 10))
+plt.title('Hierarchical Clustering Dendrogram')
+plt.ylabel('word')
+plt.xlabel('distance')
+
+dendrogram(
+    l,
+    leaf_rotation=90.,  # rotates the x axis labels
+    leaf_font_size=16.,  # font size for the x axis labels
+    orientation='left',
+    leaf_label_func=lambda v: str(model.wv.index2word[v])
+)
+plt.show()
+
+
+
+
+
+
+index1,metrics1 = model.cosine(u'物流')
+index2,metrics2 = model.cosine(u'舒服')
+index3,metrics3 = model.cosine(u'好看')
+index4,metrics4 = model.cosine(u'价格')
+index5,metrics5 = model.cosine(u'尺码')
+
+# add the index of center word 
+index01=np.where(model.wv.vocab==u'物流')
+index02=np.where(model.wv.vocab==u'舒服')
+index03=np.where(model.wv.vocab==u'好看')
+index04=np.where(model.wv.vocab==u'价格')
+index05=np.where(model.wv.vocab==u'尺码')
+
+index1=np.append(index1,index01)
+index2=np.append(index2,index03)
+index3=np.append(index3,index03)
+index4=np.append(index4,index04)
+index5=np.append(index5,index05)
+
+# plot the result
+zhfont = matplotlib.font_manager.FontProperties(fname='/usr/share/fonts/truetype/wqy/wqy-microhei.ttc')
+fig = plt.figure()
+ax = fig.add_subplot(111)
+
+for i in index1:
+    ax.text(X_reduced[i][0],X_reduced[i][1], model.wv.vocab[i], fontproperties=zhfont,color='r')
+
+for i in index2:
+    ax.text(X_reduced[i][0],X_reduced[i][1],model.wv.vocab[i], fontproperties=zhfont,color='b')
+
+for i in index3:
+    ax.text(X_reduced[i][0],X_reduced[i][1], model.wv.vocab[i], fontproperties=zhfont,color='g')
+
+for i in index4:
+    ax.text(X_reduced[i][0],X_reduced[i][1],model.wv.vocab[i], fontproperties=zhfont,color='k')
+
+for i in index5:
+    ax.text(X_reduced[i][0],X_reduced[i][1],model.wv.vocab[i], fontproperties=zhfont,color='c')
+
+ax.axis([0,0.8,-0.5,0.5])
+plt.show()
