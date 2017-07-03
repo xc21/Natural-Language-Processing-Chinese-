@@ -57,11 +57,13 @@ noStop= " ".join(noStop_list)
 
 
 #输出分词结果为txt
-f = open("C://Users//caoxun//Desktop//淘宝评论project//segResult3.txt", "w")
+import codecs
+
+f = codecs.open("C://Users//caoxun//Desktop//淘宝评论project//segResult3.txt", "w",'utf-8')
 f.write(segResult)
 f.close()
 
-f = open("C://Users//caoxun//Desktop//淘宝评论project//noStop3.txt", "w")
+f =codecs.open("C://Users//caoxun//Desktop//淘宝评论project//noStop3.txt", "w",'utf-8') 
 f.write(noStop)
 f.close()
 
@@ -70,14 +72,19 @@ f.close()
 #使用word2vector
 from gensim.models import word2vec
 import logging
-from gensim import corpora
+#from gensim import corpora
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-sentences = word2vec.Text8Corpus(r"C:\Users\caoxun\Desktop\淘宝评论project\noStop3.txt")
+sentences = word2vec.Text8Corpus(r"C:\Users\caoxun\Desktop\淘宝评论project\noStop3.txt",)#需要读取成utf-8，现在前面文件写入时设置好
 #sentences = LoadCorpora('r"C:\Users\caoxun\Desktop\淘宝评论project\segResult3")
 # 加载语料
 model = word2vec.Word2Vec(sentences,min_count=2, size=200) #200维的词向量
 model.most_similar(u"鞋子", topn=20)
+#保存模型 save the model
+#model.save("file://C:/Users/caoxun/Desktop/淘宝评论project/model")
+#load the model
+#model = word2vec.Word2Vec.load("file://C:/Users/caoxun/Desktop/淘宝评论project/model")
+
 #[('买的', 0.9999780058860779),
 #('正品', 0.9999773502349854),
 #('穿', 0.9999763369560242),
@@ -93,7 +100,7 @@ model.most_similar(u"鞋子", topn=20)
 #('鞋底', 0.9999727606773376),
 #('买', 0.9999727606773376),
 #('可以', 0.9999725818634033),
-#('穿起来', 0.9999715685844421),
+#('穿起来', 0.9999715685844421),         
 #('物流', 0.9999715089797974),
 #('穿着', 0.9999712705612183),
 #('不知道', 0.9999710917472839),
@@ -123,16 +130,64 @@ model = word2vec.Word2Vec.load('mymodel') #can continue training with the loaded
 
 #K-means聚类
 from sklearn.cluster import KMeans
-
-
 # Set "k" (num_clusters) to be 1/5th of the vocabulary size, or an
 # average of 5 words per cluster
 word_vectors = model.wv.syn0
-num_clusters = 5
-
 # Initalize a k-means object and use it to extract centroids
 kmeans_clustering = KMeans(n_clusters = num_clusters)
 idx = kmeans_clustering.fit_predict(word_vectors)
+
+
+
+#按照k-means k的取值进行迭代并画图
+from scipy.spatial.distance import cdist, pdist
+
+K = range(1,50)
+KM = [KMeans(n_clusters=k).fit(word_vectors) for k in K]
+centroids = [k.cluster_centers_ for k in KM]
+
+D_k = [cdist(word_vectors, cent, 'euclidean') for cent in centroids]
+cIdx = [np.argmin(D,axis=1) for D in D_k]
+dist = [np.min(D,axis=1) for D in D_k]
+avgWithinSS = [sum(d)/word_vectors.shape[0] for d in dist]
+
+# Total with-in sum of square
+wcss = [sum(d**2) for d in dist]
+tss = sum(pdist(word_vectors)**2)/word_vectors.shape[0]
+bss = tss-wcss
+
+kIdx = 10-1
+
+# elbow curve
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.plot(K, avgWithinSS, 'b*-')
+ax.plot(K[kIdx], avgWithinSS[kIdx], marker='o', markersize=12, 
+markeredgewidth=2, markeredgecolor='r', markerfacecolor='None')
+plt.grid(True)
+plt.xlabel('Number of clusters')
+plt.ylabel('Average within-cluster sum of squares')
+plt.title('Elbow for KMeans clustering')
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.plot(K, bss/tss*100, 'b*-')
+plt.grid(True)
+plt.xlabel('Number of clusters')
+plt.ylabel('Percentage of variance explained')
+plt.title('Elbow for KMeans clustering')
+
+
+
+
+#so, we choose k=10
+
+
+num_clusters = 5
+for clsNum in range(2,20):
+    
+
+
 
 wordDict = dict(zip(model.wv.index2word, idx))
 
