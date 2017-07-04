@@ -185,9 +185,19 @@ num_clusters = 20
 # Initalize a k-means object and use it to extract centroids
 kmeans_clustering = KMeans(n_clusters = num_clusters)
 idx = kmeans_clustering.fit_predict(word_vectors)
+words=(model.wv.index2word)
+wordDict = dict(zip(idx,model.wv.index2word))
 
-wordDict = dict(zip(model.wv.index2word, idx))
 
-#return dictionary key by its value
-#将dict变为list
-wordDict_list = list(wordDict)
+#按照类目数目，打印出每一类中的词组
+#初始化一个list of lists,然后按照cluster number依次传入
+test = [[] for i in range(0,num_clusters-1)]
+for cluster in range(0,num_clusters-1):
+    for i in range(len(idx)):
+        if idx[i]==cluster:
+            #contentTemp.append()
+            test[cluster].append(words[i])
+
+#打印出每个cluster的内容
+for i in range(0,num_clusters-1):
+    print("Cluster" ,i, test[i]) #固定字符和变量的联合打印
