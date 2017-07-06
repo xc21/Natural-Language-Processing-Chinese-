@@ -111,58 +111,17 @@ noStop2 =  re.split(r'[～，;！。?？、...]', noStop)
 
 
 #按照短句计算短句的平均值特征向量
+
+#初始化feature vector
+featureVec = np.zeros((200,),dtype="float32")
+commentFeatureVecs = np.zeros((len(noStop2),200),dtype="float32")
+
+
 for i in range(len(noStop2)):
-    if 
     #这个小短句中的词组数 = 空格数-1
-    wordNum = (noStop2[1].count(' ')) -1
-    
-import numpy as np 
-def makeFeatureVec(words, model, num_features):
-    featureVec = np.zeros((num_features,),dtype="float32")
-    nwords = 0.
-     
-    # Index2word is a list that contains the names of the words in 
-    # the model's vocabulary. Convert it to a set, for speed 
-    #transform from dictionary to set
-    index2word_set = set(model.wv.vocab)
-    #
-    # Loop over each word in the review and, if it is in the model's
-    # vocaublary, add its feature vector to the total
-    for part in noStop2:
-        if word in index2word_set: 
-            nwords = nwords + 1.
+    wordNum = (noStop2[i].count(' ')) -1
+    for word in noStop2[i].split():
+        if word in words:
             featureVec = np.add(featureVec,model[word])
-    # 
-    # Divide the result by the number of words to get the average
-    featureVec = np.divide(featureVec,nwords)
-    return featureVec
-
-
-def getAvgFeatureVecs(noStop, model, num_features):
-    # Given a set of reviews (each one a list of words), calculate 
-    # the average feature vector for each one and return a 2D numpy array 
-    # 
-    # Initialize a counter
-    counter = 0.
-    # 
-    # Preallocate a 2D numpy array, for speed
-    reviewFeatureVecs = np.zeros((len(noStop),num_features),dtype="float32")
-    # 
-    # Loop through the reviews
-    for comment in noStop:
-       #
-       # Print a status message every 1000th review
-       if counter%1000. == 0.:
-           print ("Review %d of %d" % (counter, len(reviews)))
-       # 
-       # Call the function (defined above) that makes average feature vectors
-       reviewFeatureVecs[counter] = makeFeatureVec(noStop, model, \
-           num_features)
-       #
-       # Increment the counter
-       counter = counter + 1.
-    return reviewFeatureVecs
-
-
-
-
+            if wordNum != 0:
+                featureVec = np.divide(featureVec,wordNum)
