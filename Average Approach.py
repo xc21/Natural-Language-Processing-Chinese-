@@ -140,18 +140,18 @@ from sklearn.cluster import KMeans
 #按照k-means k的取值进行迭代并画图
 from scipy.spatial.distance import cdist, pdist
 
-K = range(1,50)
+K = range(1,20)
 KM = [KMeans(n_clusters=k).fit(commentFeatureVecs) for k in K]
 centroids = [k.cluster_centers_ for k in KM]
 
-D_k = [cdist(word_vectors, cent, 'euclidean') for cent in centroids] #Computes distance between each word and cluster centroid， for different k
+D_k = [cdist(commentFeatureVecs, cent, 'euclidean') for cent in centroids] #Computes distance between each word and cluster centroid， for different k
 cIdx = [np.argmin(D,axis=1) for D in D_k] #返回最小距离的index, for different k
 dist = [np.min(D,axis=1) for D in D_k] #返回最小距离, for different k
-avgWithinSS = [sum(d)/word_vectors.shape[0] for d in dist] #计算SSE的均值
+avgWithinSS = [sum(d)/len(commentFeatureVecs) for d in dist] #计算SSE的均值
 
 # Total with-in sum of square
 wcss = [sum(d**2) for d in dist]
-tss = sum(pdist(word_vectors)**2)/word_vectors.shape[0] #compute pairwise distance
+tss = sum(pdist(commentFeatureVecs)**2)/len(commentFeatureVecs) #compute pairwise distance
 bss = tss-wcss
 
 #
@@ -160,7 +160,7 @@ bss = tss-wcss
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.plot(K, avgWithinSS, 'b*-')
-ax.plot(K[20], avgWithinSS[20], marker='o', markersize=12, 
+ax.plot(K[15], avgWithinSS[15], marker='o', markersize=12, 
 markeredgewidth=2, markeredgecolor='r', markerfacecolor='None')
 plt.grid(True)
 plt.xlabel('Number of clusters')
@@ -179,10 +179,10 @@ plt.title('Elbow for KMeans clustering')
 
 #选定k值，再一次聚类建模
 #so, we choose k=13
-num_clusters = 20
+num_clusters = 15
 # Initalize a k-means object and use it to extract centroids
 kmeans_clustering = KMeans(n_clusters = num_clusters)
-idx = kmeans_clustering.fit_predict(word_vectors)
+idx = kmeans_clustering.fit_predict(commentFeatureVecs)
 words=(model.wv.index2word)
 wordDict = dict(zip(idx,model.wv.index2word))
 
