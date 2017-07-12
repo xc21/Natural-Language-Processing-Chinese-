@@ -106,6 +106,7 @@ words = model.wv.vocab
 wordsVect = model.wv.syn0
 
 import re
+#noStop2 = re.sub(' 。 。 。   ～ ～ ！ ！ ！。 。 。 。 。 。','... ',noStop)
 noStop2 =  re.split(r'[～，;！。?？、...]', noStop)
 #shoes_new_str = ''.join(shoes_new)
 
@@ -113,22 +114,25 @@ noStop2 =  re.split(r'[～，;！。?？、...]', noStop)
 #按照短句计算短句的平均值特征向量
 
 #初始化feature vector
+
 import numpy as np
 featureVec = np.zeros((200,),dtype="float32")
 commentFeatureVecs = []
 
 
+#遍历noStop2小短句中的每一句
 for i in range(len(noStop2)):
     #这个小短句中的词组数 = 空格数-1
     wordNum = (noStop2[i].count(' ')) -1
+    #遍历当前小短句里的每一个词
     for word in noStop2[i].split():
+        #如果当前的词在w2v里的词典里
         if word in words:
             featureVec = np.add(featureVec,model[word])
-            if wordNum != 0:
-                featureVec = np.divide(featureVec,wordNum)
-                commentFeatureVecs.append(featureVec)
-                
-                
+    if wordNum != 0:
+    #只有在上一个for loop遍历完noStop2[当前的i]后才执行下一步
+        featureVec = np.divide(featureVec,wordNum)      
+    commentFeatureVecs.append(featureVec.tolist())
                 
 #按照comment Feature Vecs 来聚类
 #K-means聚类
@@ -138,13 +142,15 @@ from sklearn.cluster import KMeans
 
 
 #按照k-means k的取值进行迭代并画图
+#Elbow方法确定k值
+#计算sum of squares between groups 除以 the sum of squares total所得的商
 from scipy.spatial.distance import cdist, pdist
 
 K = range(1,20)
 KM = [KMeans(n_clusters=k).fit(commentFeatureVecs) for k in K]
 centroids = [k.cluster_centers_ for k in KM]
 
-D_k = [cdist(commentFeatureVecs, cent, 'euclidean') for cent in centroids] #Computes distance between each word and cluster centroid， for different k
+D_k = [cdist(commentFeatureVecs, cent, 'euclidean') for cent in centroids] #对于不同的k,计算每个分句和cluster中心的欧式距离
 cIdx = [np.argmin(D,axis=1) for D in D_k] #返回最小距离的index, for different k
 dist = [np.min(D,axis=1) for D in D_k] #返回最小距离, for different k
 avgWithinSS = [sum(d)/len(commentFeatureVecs) for d in dist] #计算SSE的均值
@@ -155,12 +161,12 @@ tss = sum(pdist(commentFeatureVecs)**2)/len(commentFeatureVecs) #compute pairwis
 bss = tss-wcss
 
 #
-# elbow curve,根据图像估测曲线在k=20后趋于平稳
+# elbow curve,根据图像估测曲线在k=15后趋于平稳
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.plot(K, avgWithinSS, 'b*-')
-ax.plot(K[15], avgWithinSS[15], marker='o', markersize=12, 
+ax.plot(K[14], avgWithinSS[14], marker='o', markersize=12, 
 markeredgewidth=2, markeredgecolor='r', markerfacecolor='None')
 plt.grid(True)
 plt.xlabel('Number of clusters')
@@ -182,9 +188,9 @@ plt.title('Elbow for KMeans clustering')
 num_clusters = 15
 # Initalize a k-means object and use it to extract centroids
 kmeans_clustering = KMeans(n_clusters = num_clusters)
-idx = kmeans_clustering.fit_predict(commentFeatureVecs)
-words=(model.wv.index2word)
-wordDict = dict(zip(idx,model.wv.index2word))
+idx = kmeans_clustering.fit_predict(commentFeatureVecs) #len(idx)=7292
+
+wordDict = dict(zip(idx,commentFeatureVecs))#应该对应comment的语句啊啊啊啊啊啊啊啊啊啊啊
 
 
 #按照类目数目，打印出每一类中的词组
@@ -194,7 +200,7 @@ for cluster in range(0,num_clusters-1):
     for i in range(len(idx)):
         if idx[i]==cluster:
             #contentTemp.append()
-            test[cluster].append(words[i])
+            test[cluster].append(noStop2[i])
 
 #打印出每个cluster的内容
 for i in range(0,num_clusters-1):
