@@ -50,15 +50,15 @@ print (segResult)
 
 #将停用词txt读取成为string变量
 with open('C://Users//caoxun//Desktop//淘宝评论project//Chinese Stop Words.txt', 'r') as myfile:
-    stopwords=myfile.read().replace('\n', '')
+stopwords=myfile.read().replace('\n', '')
       
       
 #删除停用词
-segList = segResult.split()
-stopwordsSet = set(stopwords)
-noStop_list=[seg for seg in segList if seg not in stopwordsSet]
-noStop= " ".join(noStop_list)
-
+#segList = segResult.split()
+#stopwordsSet = set(stopwords)
+#noStop_list=[seg for seg in segList if seg not in stopwordsSet]
+#noStop= " ".join(noStop_list)
+noStop=segResult
 #去除多余空格，避免词库报错
 noStop = re.sub('     ',' ',noStop)
 
@@ -106,9 +106,13 @@ words = model.wv.vocab
 wordsVect = model.wv.syn0
 
 import re
-#noStop2 = re.sub(' 。 。 。   ～ ～ ！ ！ ！。 。 。 。 。 。','... ',noStop)
-noStop2 =  re.split(r'[～，;！。?？、...]', noStop)
+#noStop2 =re.sub("[\.\!\/_$%^*(+\"\'+——！、@#￥%& ? ？（）~]+", " 。",noStop)
+#noStop2 = re.split(r"[～，;！。?？?、...？]+", noStop)
+#noStop2 =  re.split(r'[～，;！。?？?、...？?。;?！ ]*', noStop2)
 #shoes_new_str = ''.join(shoes_new)
+#用正则替换清理标点
+noStop2 = re.sub(r"[～，;！。?？?、？]+", " 。",noStop)
+noStop2 =  re.split(r'[。]+', noStop2)
 
 
 #按照短句计算短句的平均值特征向量
@@ -146,7 +150,7 @@ from sklearn.cluster import KMeans
 #计算sum of squares between groups 除以 the sum of squares total所得的商
 from scipy.spatial.distance import cdist, pdist
 
-K = range(1,20)
+K = range(1,30)
 KM = [KMeans(n_clusters=k).fit(commentFeatureVecs) for k in K]
 centroids = [k.cluster_centers_ for k in KM]
 
@@ -166,7 +170,7 @@ bss = tss-wcss
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.plot(K, avgWithinSS, 'b*-')
-ax.plot(K[14], avgWithinSS[14], marker='o', markersize=12, 
+ax.plot(K[20], avgWithinSS[20], marker='o', markersize=12, 
 markeredgewidth=2, markeredgecolor='r', markerfacecolor='None')
 plt.grid(True)
 plt.xlabel('Number of clusters')
@@ -184,13 +188,13 @@ plt.title('Elbow for KMeans clustering')
 
 
 #选定k值，再一次聚类建模
-#so, we choose k=13
-num_clusters = 15
+#so, we choose k=20
+num_clusters = 20
 # Initalize a k-means object and use it to extract centroids
 kmeans_clustering = KMeans(n_clusters = num_clusters)
-idx = kmeans_clustering.fit_predict(commentFeatureVecs) #len(idx)=7292
+idx = kmeans_clustering.fit_predict(commentFeatureVecs) 
 
-wordDict = dict(zip(idx,commentFeatureVecs))#应该对应comment的语句啊啊啊啊啊啊啊啊啊啊啊
+wordDict = dict(zip(idx,commentFeatureVecs))
 
 
 #按照类目数目，打印出每一类中的词组
@@ -207,6 +211,35 @@ for i in range(0,num_clusters-1):
     print("Cluster" ,i, test[i]) #固定字符和变量的联合打印
             
 
+from collections import Counter 
+freqcount = Counter(test[1]).most_common(20)
+print( freqcount)  
+#[('  ', 19),
+# (' 穿着 很 舒服  ', 11),
+# (' 不错  ', 8),
+# (' 鞋子 收到 了  ', 7),
+# (' 大小 合适  ', 5),
+# (' 轻便  ', 5),
+#(' 赞 一个  ', 5),
+#(' 但是 其他 地方 刚好 合适  ', 4),
+#(' 是 正品  ', 4),
+#(' 物流 很快  ', 4),
+#(' 鞋口 有点 小  ', 3),
+#(' 穿起来 很 舒服  ', 3),
+#(' 一个 字  ', 3),
+#(' 穿 的 非常 舒服  ', 3),
+#(' 这个 价格 不值得 买  ', 3),
+#(' 鞋子 穿 的 很 舒服  ', 3),
+#(' 但是 真的 帅  ', 3),
+#(' 我 第一次 穿 这样 鞋口 的 鞋  ', 3),
+#(' 透气  ', 3),
+#(' 超级 喜欢  ', 3)]
+
+
+#提高频的词，去掉次数
+freqwords = []
+for j in range(0,19):
+       freqwords.append(freqcount[j][0])
     
     
     
