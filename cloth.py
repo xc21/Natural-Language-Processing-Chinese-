@@ -103,19 +103,47 @@ f.close()
 
 
 
+
+
 #使用word2vector
 from gensim.models import word2vec
 import logging
 #from gensim import corpora
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-sentences = word2vec.Text8Corpus(r"C:\Users\caoxun\Desktop\淘宝评论project\noStop3.txt",)#需要读取成utf-8，先在前面文件写入时设置好
+sentences = word2vec.Text8Corpus(r"C:\Users\caoxun\Desktop\淘宝评论project\noStop6.txt",)#需要读取成utf-8，先在前面文件写入时设置好
 #sentences = LoadCorpora('r"C:\Users\caoxun\Desktop\淘宝评论project\segResult3")
 # 加载语料
 model = word2vec.Word2Vec(sentences,min_count=2, size=200) #200维的词向量
-#model.most_similar(u"鞋子", topn=20)
+model.most_similar(u"偏大", topn=5)
+#[('太大', 0.9695711135864258),
+# ('小', 0.969524085521698),
+# ('这么', 0.9694556593894958),
+# ('一样', 0.9694411754608154),
+# ('到', 0.9694200754165649)]
 
+#结论： “偏大一组”的找相似效果比较好，但其他词语效果欠佳
 
+model.most_similar(u"物流", topn=5)
+#[('，', 0.9996504187583923),
+# ('好', 0.9996373653411865),
+# ('质量', 0.9996233582496643),
+# ('了', 0.999622106552124),
+# ('的', 0.9996165633201599)]
+
+model.most_similar(u"快递", topn=5)
+#[('，', 0.9994956254959106),
+# ('很', 0.999434769153595),
+# ('衣服', 0.9994258880615234),
+# ('的', 0.9994170665740967),
+# ('好', 0.9994134902954102)]
+
+model.most_similar(u"质量", topn=5)
+#[('，', 0.9998703598976135),
+# ('的', 0.9998605251312256),
+# ('好', 0.999846339225769),
+# ('衣服', 0.9998286962509155),
+# ('很', 0.9998286962509155)]
 
 
 #将model中的词和对应向量保存
@@ -132,6 +160,7 @@ words = model.wv.vocab
 #提出vector
 wordsVect = model.wv.syn0
 
+#标点处理 （可删除？）
 import re
 #noStop2 =re.sub("[\.\!\/_$%^*(+\"\'+——！、@#￥%& ? ？（）~]+", " 。",noStop)
 #noStop2 = re.split(r"[～，;！。?？?、...？]+", noStop)
@@ -144,8 +173,7 @@ noStop2 =  re.split(r'[。！，]+', noStop)
 
 #按照短句计算短句的平均值特征向量
 
-#初始化feature vector
-
+#初始化feature vector （小短句为单位）
 import numpy as np
 featureVec = np.zeros((200,),dtype="float32")
 commentFeatureVecs = []
@@ -192,7 +220,7 @@ tss = sum(pdist(commentFeatureVecs)**2)/len(commentFeatureVecs) #compute pairwis
 bss = tss-wcss
 
 #
-# elbow curve,根据图像估测曲线在k=15后趋于平稳
+# elbow curve,根据图像估测曲线在k= 后趋于平稳
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -241,18 +269,20 @@ for i in range(0,num_clusters-1):
 from collections import Counter 
 for i in range(0, 3):
     freqcount = Counter(test[i]).most_common(20)
-    print( freqcount)  
+    print( "Cluster" , i, freqcount)  
 
 
 #提高频的词，去掉次数
 freqwords = []
-for j in range(0,19):
+for j in range(0,19):              
        freqwords.append(freqcount[j][0])
     
     
     
-    
-    
+ #   但是爬虫结果有重复， 
+#Cluster 0 [(' 大小 合适 ', 5), (' 衣服 也 不 咋 地 ', 2), (' 就是 买大 了 点 ', 2), ('   挺 好 的 ', 2), ('   质量 不错 ', 2), (' 一切 都 满意 ', 2), (' 看着 也 不错 ', 2), (' 卖家 给我发 的 是 桔 蓝色 的 ', 2), (' 质量 好   衣服 收到 了 ', 2), (' 给 弟弟 买的 ', 2), (' 还 以为 很 薄 ', 2), (' 他 非常 喜欢 ', 2), ('   衣服 挺不错 的 ', 2), (' 质量 蛮 好   挺 好 的 ', 2), (' 特别 暖和 ', 2), (' 以后 买 衣服 找 这家 了 昂 ', 2), (' 质量 跟 六七十 的 一样 ', 2), (' 我弟 穿着 有点 大 ', 2), (' 是 帮 老弟 买的 ', 2), (' 可以 买 ', 2)]
+#Cluster 1 [(' 失望 失望 ', 2), (' 服务态度 也好 ', 2), (' 跟 图片 一样 ', 2), (' 值这个价 钱 ', 2), (' 原本 想放 着 ', 2), (' 谁 知道 下雨 ', 2), (' 正好 用 ', 2), ('   对得起 这个 价钱 ', 2), (' 尺码 准 颜色 正 棒棒哒 ', 2), (' 换货 麻烦 ', 2), (' 有需要 还会 光顾 哦   好好 很 暖和   衣服 还有 看   感觉 还 可以   这 也 太大 啦   还 行 ', 2), (' 但是 感觉 布料 摸 着 怪怪的   不错   衣服 开线 了 ', 2), (' 款式 简单 大气 ', 2), ('   还好 吧       ', 2), (' 不知道 以后 会 不会 起球   这个 不错 ', 2), (' 但是 要个 L 为什么 那么 大 ？   有些 大 了 … … 摸 起来 感觉 怪怪的   还好 ', 2), (' 气味 重了 ', 2), (' 差不多 就 这价 吧   先 收货   漂亮 暖和 ', 2), (' 好评   看起来 不错 五星 好评 ', 2), (' 样子 如图 ', 2)]
+#Cluster 2 [(' 质量 很 好 ', 6), (' 好评 ', 6), (' 质量 也 很 好 ', 4), (' 非常 好 ', 3), (' 质量 好 ', 2), (' 质量 还 可以 ', 2), (' 不错 ', 2), (' 喜欢 ', 2), (' 很 喜欢 ', 2), (' 质量 不错 ', 2), (' 值 了 ', 2), (' 挺厚 的 ', 2), (' 很 合适 ', 2), (' 衣服 也 很 合身 ', 2), (' 非常 非常 的 好 ', 2), (' 好 哦 ', 2), (' 质量 很 不错 ', 2), (' 质量 也 不错 ', 2), (' 物有所值 ', 1)]    
     
     
     
