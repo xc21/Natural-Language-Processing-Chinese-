@@ -1,20 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jul 12 17:49:36 2017
-
-@author: caoxun
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jun 29 13:50:26 2017
-
-@author: caoxun
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jun 29 10:22:07 2017
+Created on Mon Jul 17 19:54:57 2017
 
 @author: caoxun
 """
@@ -24,24 +10,20 @@ import jieba
 import re  
 
 
-#读取数据   
-product = codecs.open('C:\\Users\\caoxun\\Desktop\\淘宝评论project\\Comment_Test.txt', mode='r', errors='strict', buffering=1)
-
 #初始化    
 product_new =""
 
-#合并行
+#读取评论，合并行
 #for line in shoes.readlines():
  #   shoes_new += "".join(line.split('\n'))
 
-import codecs    
-with codecs.open('C:\\Users\\caoxun\\Desktop\\淘宝评论project\\Comment_Test.txt', "r",'utf-8') as f:
+with codecs.open('C:\\Users\\caoxun\\Desktop\\淘宝评论project\\cloth.csv', "r") as f:
     proruct_new = " ".join(line.strip() for line in f)  
     
 #遍历，输入评论中重复的标点 （空格可以之后再.strip）
 def get_solo(text):
     duels=[x+x for x in list('。，！?')]
-    #如需增加标点符号,比如问号,直接将list('。，!')换成list('。，!？')即可.
+    #如需增加标点符号,比如问号,直接将list('。，!')换成list('。，!？')即可. 程度
     for d in duels:
         while d in text:
             text=text.replace(d,d[0])
@@ -60,10 +42,6 @@ if __name__=='__main__':
 product_new = proruct_new.replace(u'\ufeff', '')
 
 
-#按照表示分句的标点将string分割成list，这样list上的每一位就为一个短句了
-#import re
-#shoes_new =  re.split(r'[～，;！。?？、...]', shoes_new)
-#shoes_new_str = ''.join(shoes_new)
 
 #导入人工定义的字典,提高分词精准率
 jieba.load_userdict('C://Users//caoxun//Desktop//淘宝评论project//newDict.txt')
@@ -103,7 +81,29 @@ f.close()
 
 
 
+#将去完停词的评论按照标点划分小短句
+import re 
+noStop2 =  re.split(r'[。！，]+', noStop)
 
+
+#用list of lists读取function tags功能词表
+functTags=[]
+with open('C://Users//caoxun//Desktop//淘宝评论project//功能点库//funcTags.txt', 'r', encoding='utf-8') as file:
+     lines = [line for line in file.read().split('\n')] #分行处理，一行一位
+for line in lines:
+    functTags.append(line.split())
+
+
+#逐句遍历，小短句中是否有function tag，若有，则保留这个小短句
+cmtKeep=x = [[] for i in range(10)]       
+for i in range(len(functTags)):
+    for j in range(len(functTags[i])):
+        for k in range(len(noStop2)): 
+           if functTags[i][j] in noStop2[k].split():
+                cmtKeep[i].append(noStop2[k])
+                
+                
+#下一步： 将cmtKeep上每一个
 
 #使用word2vector
 from gensim.models import word2vec
@@ -113,8 +113,10 @@ import logging
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 sentences = word2vec.Text8Corpus(r"C:\Users\caoxun\Desktop\淘宝评论project\noStop6.txt",)#需要读取成utf-8，先在前面文件写入时设置好
 #sentences = LoadCorpora('r"C:\Users\caoxun\Desktop\淘宝评论project\segResult3")
-# 加载语料
+# 训练w2v
 model = word2vec.Word2Vec(sentences,min_count=2, size=200) #200维的词向量
+
+
 model.most_similar(u"偏大", topn=5)
 #[('太大', 0.9695711135864258),
 # ('小', 0.969524085521698),
