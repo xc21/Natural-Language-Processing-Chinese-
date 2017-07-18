@@ -63,8 +63,14 @@ stopwordsSet = set(stopwords)
 noStop_list=[seg for seg in segList if seg not in stopwordsSet]
 noStop= " ".join(noStop_list)
 noStop=segResult
-#去除多余空格，避免词库报错
-noStop = re.sub('     ',' ',noStop)
+#去除标点前的多余空格，避免词库报错
+noStop = re.sub(r'\s{2,}',' ',noStop)
+noStop = re.sub(r' 。','。',noStop)
+noStop = re.sub(r' ，','，',noStop)
+noStop = re.sub(r' ！','！',noStop)
+noStop = re.sub(r' !','!',noStop)
+
+
 
 #输出分词结果为txt
 import codecs
@@ -100,7 +106,7 @@ for i in range(len(functTags)):
         for k in range(len(noStop2)): 
            if functTags[i][j] in noStop2[k].split():
                 cmtKeep[i].append(noStop2[k])
-                
+cmtKeep                
 
 #下一步： 将cmtKeep上每一个功能词中对应的评论提出，分别聚类训练
 cmt_quality =  ','.join(cmtKeep[0])
@@ -117,7 +123,7 @@ cmt_cltGeneral = ''.join(cmtKeep[7])
 cmt_buy = ''.join(cmtKeep[8])
 cmt_pos = ''.join(cmtKeep[9])
    
-             
+####################################################测试“质量”标签下对应的评论##############################################             
 
 #使用word2vector
 from gensim.models import word2vec
@@ -241,7 +247,7 @@ plt.title('Elbow for KMeans clustering')
 
 #选定k值，再一次聚类建模
 #so, we choose k=20
-num_clusters = 5
+num_clusters = 3
 # Initalize a k-means object and use it to extract centroids
 kmeans_clustering = KMeans(n_clusters = num_clusters)
 idx = kmeans_clustering.fit_predict(commentFeatureVecs) 
@@ -253,15 +259,15 @@ wordDict = dict(zip(idx,commentFeatureVecs))
 #初始化一个list of lists,然后按照cluster number依次传入
 #将cmt_quality_list转变为list
 cmt_quality_list=cmt_quality.split()
-test = [[] for i in range(0,5)]
-for cluster in range(0,5):
+test = [[] for i in range(0,3)]
+for cluster in range(0,3):
     for i in range(len(idx)):
         if idx[i]==cluster:
             #contentTemp.append()
             test[cluster].append(cmt_quality2[i])
 
 #打印出每个cluster的内容
-for i in range(0,num_clusters-1):
+for i in range(0,3):
     print("Cluster" ,i, test[i]) #固定字符和变量的联合打印
             
 
