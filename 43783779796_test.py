@@ -108,9 +108,11 @@ negative=negative.replace(u'\ufeff', '').split()
 
 neg=[]
 with open('C://Users//caoxun//Desktop//淘宝评论project//衣服鞋子的商品库//否定词.txt', 'r', encoding='utf-8') as file:
-    neg=file.read().replace('\n', '')
+    neg=file.read().replace('\n', '').split()
 
-#找出正负评价中最常出现的
+
+
+#找出正评价中最常出现的
 cmtKeepPos = []       
 for i in range(len(pos)):
     for k in range(len(noStop2)): 
@@ -119,7 +121,9 @@ for i in range(len(pos)):
 cmtKeepPos   
 
 from collections import Counter 
-Counter(cmtKeepPos).most_common(20)
+Counter(cmtKeepPos).most_common(50)
+
+#找出负评价中最常出现的
 
 cmtKeepNeg = []       
 for i in range(len(negative)):
@@ -127,6 +131,38 @@ for i in range(len(negative)):
         if negative[i] in noStop2[k].split():
                 cmtKeepNeg.append(noStop2[k])
 cmtKeepNeg   
+Counter(cmtKeepNeg).most_common(20)
 
-from collections import Counter 
+#找出评论中带否定词的
+cmtKeepN = []       
+for i in range(len(neg)):
+    for k in range(len(noStop2)): 
+        if neg[i] in noStop2[k]:
+                cmtKeepN.append(noStop2[k])
+cmtKeepN   
+
+#检查否定词是否逆转负向词变成正向的
+test=[]
+for i in range(len(negative)):
+    for k in range(len(cmtKeepN)): 
+        if negative[i] in cmtKeepN [k]:
+           test.append(cmtKeepN [k])
+#list内去重
+test=list(set(test))
+#合并两个list
+cmtKeepPos.extend(test)
+# 合并了转义词后的most common
+Counter(cmtKeepPos).most_common(50)
+
+
+
+#检查否定词是否逆转负向词变成正向的
+test2=[]
+for i in range(len(pos)):
+    for k in range(len(cmtKeepN)): 
+        if pos[i] in cmtKeepN [k]:
+           test2.append(cmtKeepN [k])
+test2=list(set(test2))
+cmtKeepNeg.extend(test2)
+# 合并了转义词后的most common
 Counter(cmtKeepNeg).most_common(20)
