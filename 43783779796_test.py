@@ -20,9 +20,11 @@ product_new =""
 
 with codecs.open('C:\\Users\\caoxun\\Desktop\\淘宝评论project\\衣服鞋子的商品库\\43783779796_test.csv', "r") as f:
     proruct_new = " ".join(line.strip() for line in f)  
+proruct_new
 
+#把默认为标点的空格explict替换成标点，这里先替换成逗号
 #把所有的标点都替换成逗号，然后在下一步去重
-proruct_new = re.sub('[*｀Ω?*v 。？！_~ …→....，]',',', proruct_new)
+proruct_new = re.sub('[*｀Ω?*v ？！_~ …→....，]',',', proruct_new)
     
 #遍历，输入评论中重复的标点 （空格可以之后再.strip）
 def get_solo(text):
