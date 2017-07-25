@@ -67,18 +67,31 @@ with open('C://Users//caoxun//Desktop//淘宝评论project//Chinese Stop Words.t
       
 #删除停用词
 segList = segResult.split()
-stopwordsSet = set(stopwords)
-noStop_list=[seg for seg in segList if seg not in stopwordsSet]
-noStop= " ".join(noStop_list)
+stopList=stopwords.split()
+noStop=[]
+for i in range(len(segList)):
+    if segList[i] not in stopList:
+        noStop.append(segList[i])
+noStop= " ".join(noStop)
+
+#删除程度副词
+degree=[]
+with open('C://Users//caoxun//Desktop//淘宝评论project//衣服鞋子的商品库//程度副词.txt', 'r', encoding='utf-8') as file:
+    degree=file.read().replace('\n', '').split()
+noStopKeep = []       
+for i in range(len(degree)):
+    for k in range(len( noStop)): 
+        if degree[i] not in noStop[k]:
+                noStopKeep.append(noStop[k])
+#list to string
+noStopKeep="".join(noStopKeep)
+            
+#重新去除一遍标点
+
 
 #去除标点前的多余空格，避免词库报错
-noStop = re.sub(r'\s{2,}','',noStop)
-noStop = re.sub(r' 。','。',noStop)
-noStop = re.sub(r' ，','，',noStop)
-noStop = re.sub(r' ！','！',noStop)
-noStop = re.sub(r' !','!',noStop)
-noStop = re.sub(r' ？','？',noStop)
-
+noStop = re.sub(r'\s{2,}','',noStopKeep)
+noStop = re.sub(r' , , ',',',noStop)
 noStop
 
 
@@ -114,7 +127,6 @@ negative=negative.replace(u'\ufeff', '').split()
 neg=[]
 with open('C://Users//caoxun//Desktop//淘宝评论project//衣服鞋子的商品库//否定词.txt', 'r', encoding='utf-8') as file:
     neg=file.read().replace('\n', '').split()
-
 
 
 #找出正评价中最常出现的
@@ -156,28 +168,35 @@ for i in range(len(negative)):
 test=list(set(test))
 #合并两个list
 cmtKeepPos.extend(test)
+#去掉element里前后的空格
+cmtKeepPos=[x.strip() for x in cmtKeepPos]
 # 合并了转义词后的most common
-Counter(cmtKeepPos).most_common(20)
-#[(' 不错 ', 242),
-# (' 好评 ', 100),
-# (' 满意 ', 48),
-# (' 质量 不错 ', 46),
-# (' 穿着 舒服 ', 43),
-# (' 裤子 不错 ', 41),
-# (' 舒服 ', 41),
-# (' 喜欢 ', 34),
-# (' 物美价廉 ', 25),
-# (' 凉快 ', 24),
-# (' 适合 夏天 穿 ', 24),
-# (' 透气 ', 23),
-# (' 东西 不错 ', 22),
-# (' 合身 ', 22),
-# (' 推荐 购买 ', 18),
-# (' 赞 ', 18),
-# (' 值得 信赖 ', 12),
-# (' 价格 实惠 ', 11),
-# (' 不错 不错 ', 10),
- #(' 一如既往 ', 10)]
+Counter(cmtKeepPos).most_common(25)
+#[('不错', 8270),
+# ('好评', 3200),
+# ('行', 1984),
+# ('满意', 1954),
+# ('质量 不错', 1731),
+# ('穿着 舒服', 1642),
+# ('舒服', 1476),
+# ('裤子 不错', 1379),
+# ('喜欢', 1186),
+# ('凉快', 963),
+# ('赞', 962),
+# ('合身', 897),
+# ('透气', 832),
+# ('物美价廉', 832),
+# ('适合 夏天 穿', 768),
+# ('东西 不错', 708),
+# ('推荐 购买', 576),
+# ('值得 信赖', 384),
+# ('一如既往', 384),
+# ('价格 实惠', 352),
+# ('总体 不错', 321),
+# ('夏天 穿 凉快', 320),
+# ('值得 购买', 320),
+# ('不错 不错', 290),
+# ('轻', 288)]
 
 
 #检查否定词是否逆转负向词变成正向的
@@ -188,25 +207,26 @@ for i in range(len(pos)):
            test2.append(cmtKeepN [k])
 test2=list(set(test2))
 cmtKeepNeg.extend(test2)
+cmtKeepNeg=[x.strip() for x in cmtKeepNeg]
 # 合并了转义词后的most common
 Counter(cmtKeepNeg).most_common(20)
-#[(' 线头 ', 20),
-# (' 懒得 退 ', 9),
-# (' 退货 ', 4),
-# (' 物流 太烂 居然 8天 园通 无语 不想 ', 4),
-# (' 收到 裤子 皱得 无语 ', 4),
-# (' 无语 ', 4),
-# (' 做工 粗糙 ', 4),
-# (' 差评 ', 4),
-# (' 感觉 贵 不值 ', 3),
-# (' 有点 肥 ', 3),
-# (' 裤腿 有点 肥 ', 3),
-# (' 皱巴巴 ', 3),
-# (' 线头 太多 ', 3),
-# (' 线头 比较 ', 3),
-# (' 就是 线头 有点 ', 3),
-# (' 失望 ', 2),
-# (' 穿了 不到 一周 档里 全部 起球 ', 2),
-# (' 可惜 迪卡侬 之前 一款 纯棉 超薄 裤子 好像 不卖 ', 2),
-# (' 相对 价格 有点 贵 ', 2),
-# (' 就是 贵 ', 2)]
+#[('长', 837),
+# ('线头 多', 803),
+# ('裤腿 长', 422),
+# ('线头', 416),
+# ('裤子 长', 326),
+# ('懒得 退', 288),
+# ('裤腿 肥', 227),
+# ('发货 慢', 226),
+# ('裤脚 长', 224),
+# ('无语', 192),
+# ('做工 粗糙', 192),
+# ('肥', 168),
+# ('价格 贵', 160),
+# ('裤裆 短', 160),
+# ('裤子 长 点', 160),
+# ('退货', 160),
+# ('裤子 太 长', 155),
+# ('物流 慢', 130),
+# ('贵', 128),
+# ('稍微 有点儿 长', 128)]
