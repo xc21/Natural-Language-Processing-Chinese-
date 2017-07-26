@@ -142,15 +142,16 @@ with open('C://Users//caoxun//Desktop//淘宝评论project//衣服鞋子的商�
 cmtKeepN = []       
 cmtKeepNN = []   
 e=0
-for k in range(len(noStopKeep)): 
+for k in range(len(noStopKeep)):
     for i in range(len(neg)):
-        if neg[i] in noStopKeep[k].strip():
-                cmtKeepN.append(noStopKeep[k].strip())#去掉首位空格
-        else: 
-            e=1
+        if neg[i] in noStopKeep[k]: #只要有一个否定词在，就算符合条件
+                e=1 
     if e==1:       
-            cmtKeepNN.append(noStopKeep[k].strip())
-    e=0       
+            cmtKeepN.append(noStopKeep[k].strip())
+    else:
+             cmtKeepNN.append(noStopKeep[k].strip())
+    e=0 
+      
 cmtKeepN 
 cmtKeepNN  # NN= no negation
 
@@ -248,7 +249,31 @@ Counter(cmtKeepPos).most_common(20)
 # ('合身', 45)]
 
 Counter(cmtKeepNeg).most_common(25)
-
+#[('掉色', 59),
+# ('色差', 52),
+# ('褪色', 29),
+# ('洗掉色', 28),
+# ('尴尬', 23),
+# ('味道', 18),
+# ('起球', 16),
+# ('大小', 16),
+# ('有色差', 13),
+# ('小', 12),
+# ('大爱', 11),
+# ('颜色色差', 11),
+# ('失望', 10),
+# ('一般般', 10),
+# ('长度', 9),
+# ('异味', 9),
+# ('热', 8),
+# ('短', 7),
+# ('价格贵', 7),
+# ('大赞', 6),
+# ('图片色差', 6),
+# ('洗褪色', 5),
+# ('洗过掉色', 5),
+# ('差评', 5),
+# ('味道特别大', 5)]
 
 
 
