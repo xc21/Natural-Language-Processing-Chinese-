@@ -74,23 +74,9 @@ for i in range(len(segList)):
         noStop.append(segList[i])
 noStop= " ".join(noStop)
 
-#删除程度副词
-degree=[]
-with open('C://Users//caoxun//Desktop//淘宝评论project//衣服鞋子的商品库//程度副词.txt', 'r', encoding='utf-8') as file:
-    degree=file.read().replace('\n', '').split()
-noStopKeep = []       
-for i in range(len(degree)):
-    for k in range(len( noStop)): 
-        if degree[i] not in noStop[k]:
-                noStopKeep.append(noStop[k])
-#list to string
-noStopKeep="".join(noStopKeep)
-            
-#重新去除一遍标点
-
 
 #去除标点前的多余空格，避免词库报错
-noStop = re.sub(r'\s{2,}','',noStopKeep)
+noStop = re.sub(r'\s{2,}','',noStop)
 noStop = re.sub(r' , , ',',',noStop)
 noStop
 
@@ -108,10 +94,33 @@ f.write(noStop)
 f.close()
 
 
-#将去完停词的评论按照标点划分小短句
+
+#删除程度副词
+degree=[]
+with open('C://Users//caoxun//Desktop//淘宝评论project//衣服鞋子的商品库//程度副词.txt', 'r', encoding='utf-8') as file:
+    degree=file.read().replace('\n', '').split()
+    
+noStopKeep = []
+a = 0 #指示 degree词中是否有element出现过
+   
+for k in range(len(noStop)):
+    for i in range(len(degree)):
+        if degree[i] in noStop[k]: 
+            a =1 
+    if a==0: #如果在noStop的k位上遍历完都没有找到degree的element,则a依旧为0
+      noStopKeep.append(noStop[k])
+    a=0
+#list to string
+noStopKeep="".join(noStopKeep)
+noStopKeep  
+
+#将去完停词和程度词的评论按照标点划分小短句
 import re 
-noStop2 =  re.split(r'[。！,，]+', noStop)
-print(noStop2)
+noStopKeep =  re.split(r'[。！,，]+', noStopKeep)
+print(noStopKeep)
+
+
+          
 
 #分别读取正向词，负向词和否定词
 pos=[]
@@ -129,41 +138,50 @@ with open('C://Users//caoxun//Desktop//淘宝评论project//衣服鞋子的商�
     neg=file.read().replace('\n', '').split()
 
 
-#找出正评价中最常出现的
+#找出评论中的正面评论
 cmtKeepPos = []       
-for i in range(len(pos)):
-    for k in range(len(noStop2)): 
-        if pos[i] in noStop2[k].split():
-                cmtKeepPos.append(noStop2[k])
+b=0
+for k in range(len(noStopKeep)):
+    for i in range(len(pos)):
+        if pos[i] in noStopKeep[k]:
+            b=1
+    if b==1:
+        cmtKeepPos.append(noStopKeep[k])
+    b=0    
 cmtKeepPos   
 
-from collections import Counter 
-Counter(cmtKeepPos).most_common(50)
 
-#找出负评价中最常出现的
-
+#找出样本中的负面评论
 cmtKeepNeg = []       
-for i in range(len(negative)):
-    for k in range(len(noStop2)): 
-        if negative[i] in noStop2[k].split():
-                cmtKeepNeg.append(noStop2[k])
-cmtKeepNeg   
-Counter(cmtKeepNeg).most_common(20)
+c=0
+for k in range(len(noStopKeep)):
+    for i in range(len(negative)):
+        if negative[i] in noStopKeep[k] and '不错' not in noStopKeep[k] and '合适' not in noStopKeep[k]:
+            c=1
+    if c==1:
+        cmtKeepNeg.append(noStopKeep[k])
+    c=0    
+cmtKeepNeg
 
 #找出评论中带否定词的
 cmtKeepN = []       
-for i in range(len(neg)):
-    for k in range(len(noStop2)): 
-        if neg[i] in noStop2[k]:
-                cmtKeepN.append(noStop2[k])
+for k in range(len(noStopKeep)): 
+    for i in range(len(neg)):
+        if neg[i] in noStopKeep[k]:
+                cmtKeepN.append(noStopKeep[k])
 cmtKeepN   
 
 #检查否定词是否逆转负向词变成正向的
 test=[]
+d=0
 for i in range(len(negative)):
     for k in range(len(cmtKeepN)): 
         if negative[i] in cmtKeepN [k]:
+              d=1
+    if d==1:
            test.append(cmtKeepN [k])
+    d=0
+cmtKeepN
 #list内去重
 test=list(set(test))
 #合并两个list
@@ -171,62 +189,87 @@ cmtKeepPos.extend(test)
 #去掉element里前后的空格
 cmtKeepPos=[x.strip() for x in cmtKeepPos]
 # 合并了转义词后的most common
+from collections import Counter 
 Counter(cmtKeepPos).most_common(25)
-#[('不错', 8270),
-# ('好评', 3200),
-# ('行', 1984),
-# ('满意', 1954),
-# ('质量 不错', 1731),
-# ('穿着 舒服', 1642),
-# ('舒服', 1476),
-# ('裤子 不错', 1379),
-# ('喜欢', 1186),
-# ('凉快', 963),
-# ('赞', 962),
-# ('合身', 897),
-# ('透气', 832),
-# ('物美价廉', 832),
-# ('适合 夏天 穿', 768),
-# ('东西 不错', 708),
-# ('推荐 购买', 576),
-# ('值得 信赖', 384),
-# ('一如既往', 384),
-# ('价格 实惠', 352),
-# ('总体 不错', 321),
-# ('夏天 穿 凉快', 320),
-# ('值得 购买', 320),
-# ('不错 不错', 290),
-# ('轻', 288)]
+f = codecs.open("C://Users//caoxun//Desktop//淘宝评论project//cmtPos.txt", "w",'utf-8')
+f.write("".join(cmtKeepPos))
+f.close()
+
+
+#[('不错', 269),
+# ('好评', 100),
+# ('满意', 63),
+# ('穿着 舒服', 61),
+# ('质量 不错', 54),
+# ('舒服', 50),
+# ('轻薄', 44),
+# ('裤子 不错', 43),
+# ('喜欢', 39),
+# ('凉快', 32),
+# ('行', 31),
+# ('合身', 29),
+# ('还好', 29),
+# ('透气', 26),
+# ('物美价廉', 26),
+# ('适合 夏天 穿', 24),
+# ('东西 不错', 23),
+# ('赞', 16),
+# ('还行', 14),
+# ('一如既往', 12),
+# ('价格 实惠', 11),
+# ('夏天 穿 凉快', 10),
+# ('穿起来 舒服', 10),
+# ('值得 购买', 10),
+# ('总体 不错', 10)]
 
 
 #检查否定词是否逆转负向词变成正向的
+
 test2=[]
-for i in range(len(pos)):
-    for k in range(len(cmtKeepN)): 
-        if pos[i] in cmtKeepN [k]:
+for k in range(len(cmtKeepN)):
+    for i in range(len(pos)):
+        #发现很多有正向词的短句在有转义的cmtKeepN list里是因为短句中包含‘不错’，而
+        #本身正向词并未被转义，故筛选时剔除‘不错’,'大小 合适' 中的‘大小同理’
+        if pos[i] in cmtKeepN [k] and '不错' not in cmtKeepN [k] and '合适' not in cmtKeepN [k] :
            test2.append(cmtKeepN [k])
+#list内去重
 test2=list(set(test2))
-cmtKeepNeg.extend(test2)
+#合并两个list
+cmtKeepNeg.extend(test)
+#去掉element里前后的空格
 cmtKeepNeg=[x.strip() for x in cmtKeepNeg]
 # 合并了转义词后的most common
-Counter(cmtKeepNeg).most_common(20)
-#[('长', 837),
-# ('线头 多', 803),
-# ('裤腿 长', 422),
-# ('线头', 416),
-# ('裤子 长', 326),
-# ('懒得 退', 288),
-# ('裤腿 肥', 227),
-# ('发货 慢', 226),
-# ('裤脚 长', 224),
-# ('无语', 192),
-# ('做工 粗糙', 192),
-# ('肥', 168),
-# ('价格 贵', 160),
-# ('裤裆 短', 160),
-# ('裤子 长 点', 160),
-# ('退货', 160),
-# ('裤子 太 长', 155),
-# ('物流 慢', 130),
-# ('贵', 128),
-# ('稍微 有点儿 长', 128)]
+from collections import Counter 
+Counter(cmtKeepNeg).most_common(25)
+#[('长', 31),
+# ('线头 多', 28),
+# ('不知 耐 耐穿', 21),
+# ('裤腿 长', 19),
+# ('色差', 18),
+# ('大小 合适', 18),
+# ('裤子 长', 16),
+# ('肥', 13),
+# ('线头', 13),
+# ('裤腿 肥', 10),
+# ('发货 慢', 9),
+# ('懒得 退', 9),
+# ('大', 8),
+# ('小', 7),
+# ('买大', 7),
+# ('裤脚 长', 7),
+# ('做工 粗糙', 6),
+#('物流 慢', 6),
+# ('裤子  长', 6),
+# ('裤子 长 点', 5),
+# ('价格 贵', 5),
+# ('质量 差', 5),
+# ('退货', 5),
+# ('裤裆 短', 5),
+# ('长短 合适', 4)]
+
+
+
+
+
+#实际淘宝的标签：
+#质量不错， 穿着效果不错 尺码合适 便宜 舒适度挺好的 裤子很合适 薄厚度一般
