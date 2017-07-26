@@ -108,7 +108,7 @@ for k in range(len(noStop)):
         if degree[i] in noStop[k]: 
             a =1 
     if a==0: #如果在noStop的k位上遍历完都没有找到degree的element,则a依旧为0
-      noStopKeep.append(noStop[k])
+      noStopKeep.append(noStop[k].strip())
     a=0
 #list to string
 noStopKeep="".join(noStopKeep)
@@ -144,12 +144,12 @@ cmtKeepNN = []
 e=0
 for k in range(len(noStopKeep)): 
     for i in range(len(neg)):
-        if neg[i] in noStopKeep[k]:
-                cmtKeepN.append(noStopKeep[k])
+        if neg[i] in noStopKeep[k].strip():
+                cmtKeepN.append(noStopKeep[k].strip())#去掉首位空格
         else: 
             e=1
     if e==1:       
-            cmtKeepNN.append(noStopKeep[k])
+            cmtKeepNN.append(noStopKeep[k].strip())
     e=0       
 cmtKeepN 
 cmtKeepNN  # NN= no negation
@@ -159,10 +159,10 @@ test=[]
 d=0
 for k in range(len(cmtKeepN)): 
     for i in range(len(negative)):
-        if negative[i] in cmtKeepN [k].split():
+        if negative[i] in cmtKeepN [k]:
               d=1
     if d==1:
-           test.append(cmtKeepN [k])
+           test.append(cmtKeepN[k])
     d=0
 test
 #list内去重
@@ -172,15 +172,15 @@ cmtKeepPos=[]
 cmtKeepPos.extend(test)
 #去掉element里前后的空格
 cmtKeepPos=[x.strip() for x in cmtKeepPos]
+cmtKeepPos
 
-
-
+#检查否定词是否逆转正向词变成负向的
 test2=[]
 for k in range(len(cmtKeepN)):
     for i in range(len(pos)):
         #发现很多有正向词的短句在有转义的cmtKeepN list里是因为短句中包含‘不错’，而
         #本身正向词并未被转义，故筛选时剔除‘不错’,'大小 合适' 中的‘大小同理’
-        if pos[i] in cmtKeepN [k] and '不错 ' not in cmtKeepN [k] :
+        if pos[i] in cmtKeepN [k] and '不错' not in cmtKeepN [k] :
            test2.append(cmtKeepN [k])
 #list内去重
 test2=list(set(test2))
@@ -211,45 +211,41 @@ for k in range(len(cmtKeepNN )):
 cmtKeepPos   
 
 
-#找出样本中的负面评论
-cmtKeepNeg = []       
+#在没有否定词转义的评论里找出评论中的负面评论
 c=0
 for k in range(len(cmtKeepNN)):
     for i in range(len(negative)):
-        if negative[i] in cmtKeepNN[k] and '不错 ' not in cmtKeepNN[k] and '合适 ' not in cmtKeepNN[k] and '正好 ' not in cmtKeepNN[k]:
+        if negative[i] in cmtKeepNN[k] and '不错' not in cmtKeepNN[k] and '合适' not in cmtKeepNN[k] and '正好' not in cmtKeepNN[k]:
             c=1
     if c==1:
         cmtKeepNeg.append(cmtKeepNN[k])
     c=0    
 cmtKeepNeg
 
+
+#频次统计
 from collections import Counter 
-Counter(cmtKeepPos).most_common(25)
-#[('穿着 舒服 ', 616),
-# ('喜欢 ', 512),
-# ('不错 ', 494),
-# ('舒服 ', 364),
-# ('好评 ', 356),
-# ('满意 ', 320),
-# ('面料 舒服 ', 294),
-# ('质量 不错 ', 266),
-# ('穿上 舒服 ', 188),
-# ('料子 舒服 ', 150),
-# ('好看 ', 120),
-# ('值得 购买 ', 112),
-# ('物美价廉 ', 102),
-# ('衣服 不错 ', 94),
-# ('穿起来 舒服 ', 92),
-# ('赞 ', 92),
-# ('漂亮 ', 90),
-# ('合身 ', 90),
-# ('柔软 ', 76),
-# ('宝贝 不错 ', 76),
-# ('面料 柔软 ', 76),
-# ('不错 的 ', 74),
-# ('穿着 舒服 的 ', 74),
-# ('摸 舒服 ', 72),
-# ('凉快 ', 68)]
+Counter(cmtKeepPos).most_common(20)
+#[('穿着 舒服', 308),
+# ('喜欢', 268),
+# ('不错', 247),
+# ('舒服', 188),
+# ('好评', 178),
+# ('满意', 162),
+# ('面料 舒服', 147),
+# ('质量 不错', 133),
+# ('穿上 舒服', 94),
+# ('料子 舒服', 76),
+# ('好看', 62),
+# ('值得 购买', 56),
+# ('大小 合适', 56),
+# ('物美价廉', 51),
+# ('物流 快', 47),
+# ('赞', 47),
+# ('衣服 不错', 47),
+# ('穿起来 舒服', 46),
+# ('漂亮', 45),
+# ('合身', 45)]
 
 Counter(cmtKeepNeg).most_common(25)
 
@@ -258,4 +254,4 @@ Counter(cmtKeepNeg).most_common(25)
 
 
 #实际淘宝的标签：
-#质量不错， 穿着效果不错 尺码合适 便宜 舒适度挺好的 裤子很合适 薄厚度一般
+#很舒适 质量很好 布料好 衣服合身 便宜 快递不错 穿着不错 跟描述一致 尺寸有偏差 不舒适
